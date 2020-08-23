@@ -1,7 +1,7 @@
 import pyglet
 from pyglet import shapes
 
-
+# TODO Add Movable Pieces
 class Interface(pyglet.window.Window):
     def __init__(self):
         width, height = self.get_resolution()
