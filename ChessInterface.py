@@ -51,13 +51,23 @@ class Interface(pyglet.window.Window):
         [square.draw() for square in self.chess_squares]
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         [piece.draw() for piece in sum(self.chess_board, []) if piece]
+        if self.current_piece and mouse.LEFT:
+            self.current_piece.draw()
+        elif self.current_piece:
+            position = self.current_piece.position
+            self.chess_board[position[1]][position[0]] = self.current_piece
+            self.current_piece = None
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        x = x // self.square_size
-        y = y // self.square_size
+        x_modulus = x // self.square_size
+        y_modulus = y // self.square_size
+        if buttons and mouse.LEFT and not self.current_piece:
+            self.current_piece = self.chess_board[y_modulus][x_modulus]
+            if self.current_piece:
+                self.current_piece.position = (x, y)
+                self.chess_board[y_modulus][x_modulus] = None
         if buttons and mouse.LEFT:
-            self.current_piece = (self.chess_board[y][x], (y, x))
-            self.chess_board[y][x] = None
+            self.current_piece.position = (x, y)
 
 
 window = Interface()
