@@ -1,35 +1,31 @@
-import pyglet
-from pyglet import shapes
-
-# TODO Add Movable Pieces
-class Interface(pyglet.window.Window):
+class ChessBoard(object):
     def __init__(self):
-        width, height = self.get_resolution()
-        self.resolution = int(height * 0.93)
-        super(Interface, self).__init__(width=self.resolution, height=self.resolution)
-        super(Interface, self).set_location(int((width - self.resolution) / 2), 0)
-        self.BOARD_SIZE = 8
-        self.chess_board = self.draw_chessboard()
+        self.chess_board = self.get_initial_chessboard()
+
+    def get_initial_chessboard(self):
+        chessboard = [list([None] * 8) for _ in range(0, 8)]
+        chessboard = self.create_pawns(chessboard)
+        chessboard = self.create_other_pieces(chessboard)
+        return chessboard
 
     @staticmethod
-    def get_resolution():
-        display = pyglet.canvas.get_display()
-        screen = display.get_default_screen()
-        return screen.width, screen.height
+    def create_pawns(chessboard):
+        for index in range(0, 8):
+            chessboard[6][index] = "pawn" + "_b"
+            chessboard[1][index] = "pawn" + "_w"
+        return chessboard
 
-    def draw_chessboard(self):
-        square_size = self.resolution / self.BOARD_SIZE
-        chess_board = []
-        for column in range(0, 8):
-            for row in range(0, 8):
-                chess_board.append(
-                    shapes.Rectangle(x=row * square_size, y=column * square_size, width=square_size, height=square_size,
-                                     color=(0, 0, 0) if (column + row) % 2 == 0 else (255, 255, 255)))
-        return chess_board
-
-    def on_draw(self):
-        [square.draw() for square in self.chess_board]
-
-
-window = Interface()
-pyglet.app.run()
+    @staticmethod
+    def create_other_pieces(chessboard):
+        pieces_dictionary = {0: "castle",
+                             1: "knight",
+                             2: "bishop",
+                             3: "queen",
+                             4: "king",
+                             5: "bishop",
+                             6: "knight",
+                             7: "castle", }
+        for index in range(0, 8):
+            chessboard[0][index] = pieces_dictionary[index] + "_w"
+            chessboard[7][index] = pieces_dictionary[index] + "_b"
+        return chessboard
