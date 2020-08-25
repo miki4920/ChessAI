@@ -60,6 +60,8 @@ class Interface(pyglet.window.Window):
         y_modulus = y // self.square_size
         if buttons and mouse.LEFT and not self.current_piece:
             self.current_piece = self.chess_board[y_modulus][x_modulus]
+            self.current_piece.image.anchor_x = self.current_piece.image.width // 2
+            self.current_piece.image.anchor_y = self.current_piece.image.height // 2
             self.chess_board[y_modulus][x_modulus] = None
             self.original_position = x_modulus, y_modulus
         elif buttons and mouse.LEFT and self.current_piece:
@@ -69,7 +71,8 @@ class Interface(pyglet.window.Window):
         if self.current_piece:
             x_modulus = x // self.square_size
             y_modulus = y // self.square_size
-
+            self.current_piece.image.anchor_x = 0
+            self.current_piece.image.anchor_y = 0
             if not self.chess_board[y_modulus][x_modulus]:
                 self.current_piece.position = (x_modulus * self.square_size, y_modulus * self.square_size)
                 self.chess_board[y_modulus][x_modulus] = self.current_piece
