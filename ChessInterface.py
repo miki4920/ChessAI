@@ -7,6 +7,7 @@ from pyglet.window import mouse
 
 class Interface(pyglet.window.Window):
     def __init__(self):
+        # TODO Simplify interface, put more elements into "get_resolution"
         width, height = self.get_resolution()
         self.resolution = int(height * 0.93)
         self.square_size = int(self.resolution / 8)
@@ -31,6 +32,7 @@ class Interface(pyglet.window.Window):
         piece_image = pyglet.sprite.Sprite(piece_image)
         return piece_image
 
+    # TODO Implement a chess class
     def draw_chessboard(self):
         for column in range(0, 8):
             for row in range(0, 8):
@@ -56,9 +58,11 @@ class Interface(pyglet.window.Window):
             self.current_piece.draw()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        # TODO Make a function for those values
         x_modulus = x // self.square_size
         y_modulus = y // self.square_size
         if buttons and mouse.LEFT and not self.current_piece:
+            # TODO Move rescaling into separate function
             self.current_piece = self.chess_board[y_modulus][x_modulus]
             self.current_piece.image.anchor_x = self.current_piece.image.width // 2
             self.current_piece.image.anchor_y = self.current_piece.image.height // 2
@@ -71,6 +75,7 @@ class Interface(pyglet.window.Window):
         if self.current_piece:
             x_modulus = x // self.square_size
             y_modulus = y // self.square_size
+            # TODO Move rescaling into separate function
             self.current_piece.image.anchor_x = 0
             self.current_piece.image.anchor_y = 0
             if not self.chess_board[y_modulus][x_modulus]:
