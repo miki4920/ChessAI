@@ -64,10 +64,11 @@ class Interface(pyglet.window.Window):
         if buttons and mouse.LEFT and not self.current_piece:
             # TODO Move rescaling into separate function
             self.current_piece = self.chess_board[y_modulus][x_modulus]
-            self.current_piece.image.anchor_x = self.current_piece.image.width // 2
-            self.current_piece.image.anchor_y = self.current_piece.image.height // 2
-            self.chess_board[y_modulus][x_modulus] = None
-            self.original_position = x_modulus, y_modulus
+            if self.current_piece:
+                self.current_piece.image.anchor_x = self.current_piece.image.width // 2
+                self.current_piece.image.anchor_y = self.current_piece.image.height // 2
+                self.chess_board[y_modulus][x_modulus] = None
+                self.original_position = x_modulus, y_modulus
         elif buttons and mouse.LEFT and self.current_piece:
             self.current_piece.position = (x, y)
 
