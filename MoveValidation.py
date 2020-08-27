@@ -9,9 +9,50 @@ class ValidateMove(object):
         return self.board_bounds[0] <= self.move[0] <= self.board_bounds[1] and self.board_bounds[0] <= self.move[
             1] <= self.board_bounds[1]
 
+    def return_change(self):
+        dx = self.move[0] - self.piece.original_position[0]
+        dy = self.move[1] - self.piece.original_position[1]
+        return dx, dy
+
+    def pawn(self):
+        colour = 1 if self.piece.colour == "w" else -1
+        dy = self.return_change()[1]
+        return 0 < dy * colour <= 2
+
+    def castle(self):
+        dx, dy = self.return_change()
+        return dx != 0 and dy == 0 or dx == 0 and dy != 0
+
+    def knight(self):
+        dx, dy = self.return_change()
+        dx = abs(dx)
+        dy = abs(dy)
+        return dx == 2 and dy == 1 or dx == 1 and dy == 2
+
+    def bishop(self):
+        dx, dy = self.return_change()
+        dx = abs(dx)
+        dy = abs(dy)
+        return dx == dy and dx != 0
+
+    def queen(self):
+        return self.bishop() or self.castle()
+
+    def king(self):
+        dx, dy = self.return_change()
+        dx = abs(dx)
+        dy = abs(dy)
+        return dx < 2 and dy < 2
+
     def valid_piece_move(self):
+        function_dictionary = {"pawn": self.pawn,
+                               "castle": self.castle,
+                               "knight": self.knight,
+                               "bishop": self.bishop,
+                               "queen": self.queen,
+                               "king": self.king}
         tile = self.chess_board[self.move[1]][self.move[0]]
-        if tile is None or tile.colour != self.piece.colour:
+        if (tile is None or tile.colour != self.piece.colour) and function_dictionary[self.piece.name]():
             return True
         return False
 
