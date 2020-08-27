@@ -15,9 +15,11 @@ class ValidateMove(object):
         return dx, dy
 
     def pawn(self):
+        tile = self.chess_board[self.move[1]][self.move[0]]
         colour = 1 if self.piece.colour == "w" else -1
-        dy = self.return_change()[1]
-        return 0 < dy * colour <= 2
+        dx, dy = self.return_change()
+        return 0 < dy * colour <= 2 and dx == 0 or abs(
+            dx) == 1 and dy * colour == 1 and tile is not None and tile.colour != self.piece.colour
 
     def castle(self):
         dx, dy = self.return_change()
