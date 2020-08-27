@@ -1,6 +1,9 @@
+from ChessPiece import Piece
+
+
 class ChessBoard(object):
-    def __init__(self):
-        self.chess_board = self.get_initial_chessboard()
+    def __init__(self, square_size):
+        self.square_size = square_size
 
     def get_initial_chessboard(self):
         chessboard = [list([None] * 8) for _ in range(0, 8)]
@@ -8,15 +11,13 @@ class ChessBoard(object):
         chessboard = self.create_other_pieces(chessboard)
         return chessboard
 
-    @staticmethod
-    def create_pawns(chessboard):
+    def create_pawns(self, chessboard):
         for index in range(0, 8):
-            chessboard[6][index] = "pawn" + "_b"
-            chessboard[1][index] = "pawn" + "_w"
+            chessboard[6][index] = Piece("pawn", "b", self.square_size)
+            chessboard[1][index] = Piece("pawn", "w", self.square_size)
         return chessboard
 
-    @staticmethod
-    def create_other_pieces(chessboard):
+    def create_other_pieces(self, chessboard):
         pieces_dictionary = {0: "castle",
                              1: "knight",
                              2: "bishop",
@@ -26,6 +27,6 @@ class ChessBoard(object):
                              6: "knight",
                              7: "castle", }
         for index in range(0, 8):
-            chessboard[0][index] = pieces_dictionary[index] + "_w"
-            chessboard[7][index] = pieces_dictionary[index] + "_b"
+            chessboard[0][index] = Piece(pieces_dictionary[index], "w", self.square_size)
+            chessboard[7][index] = Piece(pieces_dictionary[index], "b", self.square_size)
         return chessboard
