@@ -4,6 +4,7 @@ from ChessBoard import ChessBoard
 from pyglet.gl import *
 from pyglet.window import mouse
 from UtilityFunctions import SizeConverter
+from MoveValidation import ValidateMove
 
 
 class Interface(pyglet.window.Window):
@@ -13,6 +14,7 @@ class Interface(pyglet.window.Window):
         self.resolution = int(height * 0.93)
         self.square_size = int(self.resolution / 8)
         self.converter = SizeConverter(self.square_size)
+        self.validator = ValidateMove()
         super(Interface, self).__init__(width=self.resolution, height=self.resolution)
         super(Interface, self).set_location(int((width - self.resolution) / 2), int(height * 0.03))
         self.chess_squares = [None] * 64
@@ -50,24 +52,24 @@ class Interface(pyglet.window.Window):
             self.current_piece.draw()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        x_modulus, y_modulus = self.converter.pts((x, y))
+        move = self.converter.pts((x, y))
         if buttons and mouse.LEFT and not self.current_piece:
-            self.current_piece = self.chess_board[y_modulus][x_modulus]
+            self.current_piece = self.chess_board[move[1]][move[0]]
             if self.current_piece:
                 self.current_piece.center()
-                self.chess_board[y_modulus][x_modulus] = None
-                self.current_piece.original_position = (x_modulus, y_modulus)
+                self.chess_board[move[1]][move[0]] = None
+                self.current_piece.original_position = (move[0], move[1])
         elif buttons and mouse.LEFT and self.current_piece:
             self.current_piece.sprite.position = (x, y)
 
     def on_mouse_release(self, x, y, button, modifiers):
         if self.current_piece:
-            x_modulus, y_modulus = self.converter.pts((x, y))
+            move = self.converter.pts((x, y))
             # TODO Move rescaling into separate function
             self.current_piece.decenter()
-            if not self.chess_board[y_modulus][x_modulus]:
-                self.current_piece.set_position((self.converter.stp(x_modulus), self.converter.stp(y_modulus)))
-                self.chess_board[y_modulus][x_modulus] = self.current_piece
+            if self.validator.validate_move(self.current_piece, move, self.chess_board):
+                self.current_piece.set_position((self.converter.stp(move[0]), self.converter.stp(move[1])))
+                self.chess_board[move[1]][move[0]] = self.current_piece
             else:
                 self.chess_board[self.current_piece.original_position[1]][
                     self.current_piece.original_position[0]] = self.current_piece
