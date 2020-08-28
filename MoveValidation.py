@@ -1,9 +1,23 @@
 class ValidateMove(object):
     def __init__(self):
         self.board_bounds = (0, 7)
+        self.all_moves = self.get_all_moves()
+        self.colour = True
         self.piece = None
         self.move = None
         self.chess_board = None
+
+    @staticmethod
+    def get_all_moves():
+        moves = []
+        for y in range(0, 8):
+            for x in range(0, 8):
+                moves.append([x, y])
+        return moves
+
+    def validate_pick(self, piece):
+        if piece:
+            return self.colour == piece.colour
 
     def in_bounds(self):
         return self.board_bounds[0] <= self.move[0] <= self.board_bounds[1] and self.board_bounds[0] <= self.move[
@@ -16,7 +30,7 @@ class ValidateMove(object):
 
     def pawn(self):
         tile = self.chess_board[self.move[1]][self.move[0]]
-        colour = 1 if self.piece.colour == "w" else -1
+        colour = 1 if self.piece.colour else -1
         dx, dy = self.return_change()
         return 0 < dy * colour <= 2 and dx == 0 and tile is None or abs(
             dx) == 1 and dy * colour == 1 and tile is not None and tile.colour != self.piece.colour
@@ -58,11 +72,16 @@ class ValidateMove(object):
             return True
         return False
 
-    def validate_move(self, piece, move, chess_board):
+    def validate_moves(self, piece, chess_board):
+        moves = [move for move in self.all_moves if self.validate_move(piece, chess_board, move)]
+        return moves
+
+    def validate_move(self, piece, chess_board, move):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
-        if self.in_bounds():
-            if self.valid_piece_move():
-                return True
+        if self.colour == self.piece.colour:
+            if self.in_bounds():
+                if self.valid_piece_move():
+                    return True
         return False

@@ -1,4 +1,4 @@
-from ChessPiece import Piece
+from ChessObjects import Piece
 
 
 class ChessBoard(object):
@@ -13,8 +13,8 @@ class ChessBoard(object):
 
     def create_pawns(self, chessboard):
         for index in range(0, 8):
-            chessboard[6][index] = Piece("pawn", "b", self.square_size)
-            chessboard[1][index] = Piece("pawn", "w", self.square_size)
+            chessboard[1][index] = Piece("pawn", True, self.square_size)
+            chessboard[6][index] = Piece("pawn", False, self.square_size)
         return chessboard
 
     def create_other_pieces(self, chessboard):
@@ -27,6 +27,6 @@ class ChessBoard(object):
                              6: "knight",
                              7: "castle", }
         for index in range(0, 8):
-            chessboard[0][index] = Piece(pieces_dictionary[index], "w", self.square_size)
-            chessboard[7][index] = Piece(pieces_dictionary[index], "b", self.square_size)
+            chessboard[0][index] = Piece(pieces_dictionary[index], True, self.square_size)
+            chessboard[7][index] = Piece(pieces_dictionary[index], False, self.square_size)
         return chessboard
