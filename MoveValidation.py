@@ -35,7 +35,7 @@ class ValidateMove(object):
 
     def validate_path(self):
         if self.tile is None or self.tile.colour != self.piece.colour:
-            if all([self.chess_board[coordinate[1]][coordinate[0]] is None for coordinate in self.return_bresenham()]):
+            if all([self.chess_board.get_tile(coordinate) is None for coordinate in self.return_bresenham()]):
                 return True
         return False
 
@@ -98,7 +98,7 @@ class ValidateMove(object):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
-        self.tile = self.chess_board[self.move[1]][self.move[0]]
+        self.tile = self.chess_board.get_tile(self.move)
         if self.colour == self.piece.colour:
             if self.valid_piece_move():
                 return True

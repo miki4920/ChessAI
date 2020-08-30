@@ -12,7 +12,7 @@ def adjust_size(sprite, size):
     sprite.image.height = size
     return sprite
 
-# TODO create dot drawing inside of the piece
+
 class Piece(object):
     def __init__(self, name, colour, size):
         self.name = name
