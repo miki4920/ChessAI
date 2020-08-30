@@ -9,6 +9,7 @@ class ValidateMove(object):
         self.move = None
         self.moves = []
         self.chess_board = None
+        self.tile = None
 
     @staticmethod
     def get_all_moves():
@@ -33,18 +34,21 @@ class ValidateMove(object):
                1:-1]
 
     def validate_path(self):
-        if self.chess_board[self.move[1]][self.move[0]] is None or self.chess_board[self.move[1]][
-            self.move[0]].colour != self.piece.colour:
+        if self.tile is None or self.tile.colour != self.piece.colour:
             if all([self.chess_board[coordinate[1]][coordinate[0]] is None for coordinate in self.return_bresenham()]):
                 return True
         return False
 
     def pawn(self):
-        tile = self.chess_board[self.move[1]][self.move[0]]
-        colour = 1 if self.piece.colour else -1
         dx, dy = self.return_change()
-        return 0 < dy * colour <= 2 and dx == 0 and tile is None or abs(
-            dx) == 1 and dy * colour == 1 and tile is not None and tile.colour != self.piece.colour
+        colour = 1 if self.piece.colour else -1
+        if abs(dx) == 1 and colour * dy == 1 and self.tile is not None and self.tile.colour != self.piece.colour:
+            return True
+        elif self.piece.previous_position and dy * colour == 1 and dx == 0 and self.tile is None:
+            return True
+        elif 1 <= dy * colour <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
+            return True
+        return False
 
     def castle(self):
         dx, dy = self.return_change()
@@ -82,8 +86,7 @@ class ValidateMove(object):
                                "bishop": self.bishop,
                                "queen": self.queen,
                                "king": self.king}
-        tile = self.chess_board[self.move[1]][self.move[0]]
-        if (tile is None or tile.colour != self.piece.colour) and function_dictionary[self.piece.name]():
+        if (self.tile is None or self.tile.colour != self.piece.colour) and function_dictionary[self.piece.name]():
             return True
         return False
 
@@ -95,6 +98,7 @@ class ValidateMove(object):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
+        self.tile = self.chess_board[self.move[1]][self.move[0]]
         if self.colour == self.piece.colour:
             if self.valid_piece_move():
                 return True

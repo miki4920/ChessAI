@@ -41,6 +41,7 @@ class Interface(pyglet.window.Window):
                                                                                255, 255, 255))
                 if self.chess_board[column][row]:
                     self.chess_board[column][row].set_position((self.converter.stp((row, column))))
+                    self.chess_board[column][row].previous_position = None
 
     def on_draw(self):
         window.clear()
@@ -70,7 +71,6 @@ class Interface(pyglet.window.Window):
             else:
                 self.chess_board[self.current_piece.original_position[1]][
                     self.current_piece.original_position[0]] = self.current_piece
-                self.current_piece.set_position(self.converter.stp(self.current_piece.original_position))
             self.current_piece = None
 
 
