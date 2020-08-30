@@ -18,8 +18,7 @@ class Piece(object):
         self.name = name
         self.colour = colour
         self.size = size
-        self.sprite = get_image(f"Textures/{self.name + '_' + ('w' if self.colour else 'b')}.png")
-        self.sprite = adjust_size(self.sprite, size)
+        self.sprite = adjust_size(get_image(f"Textures/{self.name + '_' + ('w' if self.colour else 'b')}.png"), size)
         self.original_position = self.sprite.position
 
     def set_position(self, position):

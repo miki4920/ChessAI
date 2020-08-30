@@ -1,10 +1,13 @@
+from bresenham import bresenham
+
+
 class ValidateMove(object):
     def __init__(self):
         self.board_bounds = (0, 7)
-        self.all_moves = self.get_all_moves()
         self.colour = True
         self.piece = None
         self.move = None
+        self.moves = []
         self.chess_board = None
 
     @staticmethod
@@ -19,14 +22,22 @@ class ValidateMove(object):
         if piece:
             return self.colour == piece.colour
 
-    def in_bounds(self):
-        return self.board_bounds[0] <= self.move[0] <= self.board_bounds[1] and self.board_bounds[0] <= self.move[
-            1] <= self.board_bounds[1]
-
     def return_change(self):
         dx = self.move[0] - self.piece.original_position[0]
         dy = self.move[1] - self.piece.original_position[1]
         return dx, dy
+
+    def return_bresenham(self):
+        return list(
+            bresenham(self.piece.original_position[0], self.piece.original_position[1], self.move[0], self.move[1]))[
+               1:-1]
+
+    def validate_path(self):
+        if self.chess_board[self.move[1]][self.move[0]] is None or self.chess_board[self.move[1]][
+            self.move[0]].colour != self.piece.colour:
+            if all([self.chess_board[coordinate[1]][coordinate[0]] is None for coordinate in self.return_bresenham()]):
+                return True
+        return False
 
     def pawn(self):
         tile = self.chess_board[self.move[1]][self.move[0]]
@@ -37,7 +48,9 @@ class ValidateMove(object):
 
     def castle(self):
         dx, dy = self.return_change()
-        return dx != 0 and dy == 0 or dx == 0 and dy != 0
+        if dx != 0 and dy == 0 or dx == 0 and dy != 0:
+            return self.validate_path()
+        return False
 
     def knight(self):
         dx, dy = self.return_change()
@@ -49,7 +62,9 @@ class ValidateMove(object):
         dx, dy = self.return_change()
         dx = abs(dx)
         dy = abs(dy)
-        return dx == dy and dx != 0
+        if dx == dy and dx != 0:
+            return self.validate_path()
+        return False
 
     def queen(self):
         return self.bishop() or self.castle()
@@ -73,15 +88,14 @@ class ValidateMove(object):
         return False
 
     def validate_moves(self, piece, chess_board):
-        moves = [move for move in self.all_moves if self.validate_move(piece, chess_board, move)]
-        return moves
+        self.moves = [move for move in self.get_all_moves() if self.validate_move(piece, chess_board, move)]
+        return self.moves
 
     def validate_move(self, piece, chess_board, move):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
         if self.colour == self.piece.colour:
-            if self.in_bounds():
-                if self.valid_piece_move():
-                    return True
+            if self.valid_piece_move():
+                return True
         return False
