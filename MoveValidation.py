@@ -68,7 +68,7 @@ class ValidateMove(object):
         dx, dy = self.return_change()
         dx = abs(dx)
         dy = abs(dy)
-        return dx < 2 and dy < 2
+        return dx < 2 and dy < 2 and (dx != 0 or dy != 0)
 
     def valid_piece_move(self):
         function_dictionary = {"pawn": self.pawn,
@@ -94,8 +94,13 @@ class ValidateMove(object):
         moves = [move for move in chess_board.get_all_moves() if self.validate_move(piece, chess_board, move)]
         return moves
 
-    def validate_check(self, chess_board):
+    def check(self, chess_board):
         pieces = chess_board.get_all_pieces_colour(not self.colour)
-        moves = []
+        check = False
         for piece in pieces:
-            print(piece.original_position)
+            for move in self.validate_moves(piece, chess_board):
+                move = self.chess_board.get_tile(move)
+                if move is not None and move.name == "king":
+                    check = True
+                    break
+        return check

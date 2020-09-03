@@ -1,4 +1,5 @@
 import pyglet
+from UtilityFunctions import SizeConverter
 
 
 def get_image(path):
@@ -18,14 +19,16 @@ class Piece(object):
         self.name = name
         self.colour = colour
         self.size = size
+        self.converter = SizeConverter(size)
         self.sprite = adjust_size(get_image(f"Textures/{self.name + '_' + ('w' if self.colour else 'b')}.png"), size)
-        self.original_position = self.sprite.position
+        self.original_position = None
         self.previous_position = None
 
     def set_position(self, position):
-        self.previous_position = self.original_position
+        if self.original_position is not None:
+            self.previous_position = self.original_position
         self.original_position = position
-        self.sprite.position = position
+        self.sprite.position = self.converter.stp(position)
 
     def draw(self):
         self.sprite.draw()

@@ -46,8 +46,7 @@ class Interface(pyglet.window.Window):
                                                                                COLOUR_WHITE)
                 if self.chess_board.get_tile((row, column)):
                     piece = self.chess_board.get_tile((row, column))
-                    piece.set_position((self.converter.stp((row, column))))
-                    piece.previous_position = None
+                    piece.set_position((row, column))
                     self.chess_board.set_tile((row, column), piece)
 
     def on_draw(self):
@@ -65,15 +64,18 @@ class Interface(pyglet.window.Window):
         piece = self.chess_board.get_tile(move)
         if piece and not self.current_piece:
             if mouse.LEFT and self.validator.validate_pick(piece):
-                self.validator.validate_check(self.chess_board)
                 self.current_piece = piece
                 self.current_piece.original_position = move
                 self.chess_board.set_tile(move, None)
         elif self.current_piece:
             if self.validator.validate_move(self.current_piece, self.chess_board, move):
-                self.current_piece.set_position((self.converter.stp(move[0]), self.converter.stp(move[1])))
                 self.chess_board.set_tile(move, self.current_piece)
-                self.validator.colour = not self.validator.colour
+                if not self.validator.check(self.chess_board):
+                    self.current_piece.set_position(move)
+                    self.validator.colour = not self.validator.colour
+                else:
+                    self.chess_board.set_tile(move, None)
+                    self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
             else:
                 self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
             self.current_piece = None
