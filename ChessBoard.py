@@ -40,5 +40,20 @@ class ChessBoard(object):
     def set_tile(self, move, value):
         self.chess_board[move[1]][move[0]] = value
 
+    @staticmethod
+    def get_all_moves():
+        moves = []
+        for y in range(0, 8):
+            for x in range(0, 8):
+                moves.append([x, y])
+        return moves
+
+    def get_all_pieces_colour(self, colour):
+        pieces = []
+        for move in self.get_all_moves():
+            if self.get_tile(move) is not None and self.get_tile(move).colour == colour:
+                pieces.append(self.get_tile(move))
+        return pieces
+
     def draw(self):
         [piece.draw() for piece in sum(self.chess_board, []) if piece]

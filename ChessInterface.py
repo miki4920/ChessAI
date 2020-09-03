@@ -65,6 +65,7 @@ class Interface(pyglet.window.Window):
         piece = self.chess_board.get_tile(move)
         if piece and not self.current_piece:
             if mouse.LEFT and self.validator.validate_pick(piece):
+                self.validator.validate_check(self.chess_board)
                 self.current_piece = piece
                 self.current_piece.original_position = move
                 self.chess_board.set_tile(move, None)

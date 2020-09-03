@@ -7,17 +7,8 @@ class ValidateMove(object):
         self.colour = True
         self.piece = None
         self.move = None
-        self.moves = []
         self.chess_board = None
         self.tile = None
-
-    @staticmethod
-    def get_all_moves():
-        moves = []
-        for y in range(0, 8):
-            for x in range(0, 8):
-                moves.append([x, y])
-        return moves
 
     def validate_pick(self, piece):
         if piece:
@@ -90,16 +81,21 @@ class ValidateMove(object):
             return True
         return False
 
-    def validate_moves(self, piece, chess_board):
-        self.moves = [move for move in self.get_all_moves() if self.validate_move(piece, chess_board, move)]
-        return self.moves
-
     def validate_move(self, piece, chess_board, move):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
         self.tile = self.chess_board.get_tile(self.move)
-        if self.colour == self.piece.colour:
-            if self.valid_piece_move():
-                return True
+        if self.valid_piece_move():
+            return True
         return False
+
+    def validate_moves(self, piece, chess_board):
+        moves = [move for move in chess_board.get_all_moves() if self.validate_move(piece, chess_board, move)]
+        return moves
+
+    def validate_check(self, chess_board):
+        pieces = chess_board.get_all_pieces_colour(not self.colour)
+        moves = []
+        for piece in pieces:
+            print(piece.original_position)
