@@ -81,17 +81,24 @@ class ValidateMove(object):
             return True
         return False
 
-    def validate_move(self, piece, chess_board, move):
+    def validate_move(self, piece, chess_board, move, check):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
         self.tile = self.chess_board.get_tile(self.move)
-        if self.valid_piece_move():
-            return True
-        return False
+        valid = True
+        if not self.valid_piece_move():
+            valid = False
+        if check and valid:
+            tile = self.chess_board.get_tile(move)
+            self.chess_board.set_tile(move, self.piece)
+            if self.check(self.chess_board):
+                valid = False
+            self.chess_board.set_tile(move, tile)
+        return valid
 
-    def validate_moves(self, piece, chess_board):
-        moves = [move for move in chess_board.get_all_moves() if self.validate_move(piece, chess_board, move)]
+    def validate_moves(self, piece, chess_board, check=False):
+        moves = [move for move in chess_board.get_all_moves() if self.validate_move(piece, chess_board, move, check)]
         return moves
 
     def check(self, chess_board):

@@ -54,7 +54,7 @@ class Interface(pyglet.window.Window):
         [square.draw() for square in self.chess_squares]
         if self.current_piece:
             # TODO Create a way to check for check
-            valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board)
+            valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board, True)
             [create_dot(self.converter.stp(coordinates), self.square_size).draw() for coordinates in valid_moves]
             self.current_piece.draw()
         self.chess_board.draw()
@@ -68,14 +68,10 @@ class Interface(pyglet.window.Window):
                 self.current_piece.original_position = move
                 self.chess_board.set_tile(move, None)
         elif self.current_piece:
-            if self.validator.validate_move(self.current_piece, self.chess_board, move):
+            if self.validator.validate_move(self.current_piece, self.chess_board, move, True):
                 self.chess_board.set_tile(move, self.current_piece)
-                if not self.validator.check(self.chess_board):
-                    self.current_piece.set_position(move)
-                    self.validator.colour = not self.validator.colour
-                else:
-                    self.chess_board.set_tile(move, None)
-                    self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
+                self.current_piece.set_position(move)
+                self.validator.colour = not self.validator.colour
             else:
                 self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
             self.current_piece = None
