@@ -16,12 +16,9 @@ class ValidateMove(object):
 
     @staticmethod
     def return_change(move, piece):
-        try:
-            dx = move[0] - piece[0]
-            dy = move[1] - piece[1]
-            return dx, dy
-        except:
-            print(move, piece)
+        dx = move[0] - piece[0]
+        dy = move[1] - piece[1]
+        return dx, dy
 
     def return_bresenham(self):
         return list(
@@ -34,6 +31,15 @@ class ValidateMove(object):
                 return True
         return False
 
+    def en_passant(self, dx):
+        if 0 <= self.piece.original_position[0] + dx <= 7:
+            side_tile = self.chess_board.get_tile(
+                (self.piece.original_position[0] + dx, self.piece.original_position[1]))
+            side_tile = side_tile if side_tile is not None and side_tile.previous_position is not None else None
+            if self.tile is None and side_tile is not None and side_tile.colour != self.piece.colour and abs(
+                    side_tile.original_position[1] - side_tile.previous_position[1]) == 2 and abs(dx) == 1:
+                return True
+
     def pawn(self):
         dx, dy = self.return_change(self.move, self.piece.original_position)
         colour = 1 if self.piece.colour else -1
@@ -41,20 +47,8 @@ class ValidateMove(object):
         if abs(dx) == 1 and dy == 1:
             if self.tile is not None and self.tile.colour != self.piece.colour:
                 return True
-            if 0 <= self.piece.original_position[0] + colour <= 7:
-                side_tile = self.chess_board.get_tile(
-                    (self.piece.original_position[0] + colour, self.piece.original_position[1]))
-                side_tile = side_tile if side_tile is not None and side_tile.previous_position is not None else None
-                if self.tile is None and side_tile is not None and side_tile.colour != self.piece.colour and abs(
-                        side_tile.original_position[1] - side_tile.previous_position[1]) == 2 and dx == 1:
-                    return True
-            elif 0 <= self.piece.original_position[0] - colour <= 7:
-                side_tile = self.chess_board.get_tile(
-                    (self.piece.original_position[0] - colour, self.piece.original_position[1]))
-                side_tile = side_tile if side_tile is not None and side_tile.previous_position is not None else None
-                if self.tile is None and side_tile is not None and side_tile.colour != self.piece.colour and abs(
-                        side_tile.original_position[1] - side_tile.previous_position[1]) == 2 and dx == -1:
-                    return True
+            if self.en_passant(dx):
+                return True
         elif self.piece.previous_position and dy == 1 and dx == 0 and self.tile is None:
             return True
         elif 1 <= dy <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
@@ -97,8 +91,8 @@ class ValidateMove(object):
                                "bishop": self.bishop,
                                "queen": self.queen,
                                "king": self.king}
-        if (self.tile is None or self.tile.colour != self.piece.colour) and function_dictionary[self.piece.name]():
-            return True
+        if self.tile is None or self.tile.colour != self.piece.colour:
+            return function_dictionary[self.piece.name]()
         return False
 
     def validate_move(self, piece, chess_board, move, check):

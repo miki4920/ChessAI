@@ -62,19 +62,27 @@ class Interface(pyglet.window.Window):
     def on_mouse_press(self, x, y, buttons, modifiers):
         move = self.converter.pts((x, y))
         piece = self.chess_board.get_tile(move)
-        if piece and not self.current_piece:
-            if mouse.LEFT and self.validator.validate_pick(piece):
-                self.current_piece = piece
-                self.current_piece.original_position = move
-                self.chess_board.set_tile(move, None)
+        if piece and not self.current_piece and mouse.LEFT:
+            self.select_piece(piece, move)
         elif self.current_piece:
-            if self.validator.validate_move(self.current_piece, self.chess_board, move, True):
-                self.chess_board.set_tile(move, self.current_piece)
-                self.current_piece.set_position(move)
-                self.validator.colour = not self.validator.colour
-            else:
-                self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
-            self.current_piece = None
+            self.move_piece(move)
+
+    def select_piece(self, piece, move):
+        if self.validator.validate_pick(piece):
+            self.current_piece = piece
+            self.current_piece.original_position = move
+            self.chess_board.set_tile(move, None)
+
+    def move_piece(self, move):
+        task = self.validator.validate_move(self.current_piece, self.chess_board, move, True)
+        move = task.get("move")
+        if move:
+            self.chess_board.set_tile(move, self.current_piece)
+            self.current_piece.set_position(move)
+            self.validator.colour = not self.validator.colour
+        else:
+            self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
+        self.current_piece = None
 
 
 window = Interface()
