@@ -73,13 +73,24 @@ class Interface(pyglet.window.Window):
             self.current_piece.original_position = move
             self.chess_board.set_tile(move, None)
 
-    def move_piece(self, move):
-        task = self.validator.validate_move(self.current_piece, self.chess_board, move, True)
+    def move_piece(self, destination):
+        task = self.validator.validate_move(self.current_piece, self.chess_board, destination, True)
         move = task.get("move")
+        capture = task.get("capture")
+        en_passant = task.get("en_passant")
         if move:
-            self.chess_board.set_tile(move, self.current_piece)
-            self.current_piece.set_position(move)
+            self.chess_board.set_tile(destination, self.current_piece)
+            self.current_piece.set_position(destination)
             self.validator.colour = not self.validator.colour
+        elif capture:
+            self.chess_board.set_tile(destination, self.current_piece)
+            self.current_piece.set_position(destination)
+            self.validator.colour = not self.validator.colour
+        elif en_passant:
+            self.chess_board.set_tile(destination, self.current_piece)
+            self.current_piece.set_position(destination)
+            self.validator.colour = not self.validator.colour
+            self.chess_board.set_tile(en_passant.original_position, None)
         else:
             self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
         self.current_piece = None
