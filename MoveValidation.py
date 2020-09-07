@@ -52,7 +52,7 @@ class ValidateMove(object):
                 output = {"capture": True}
             elif self.en_passant(dx):
                 output = self.en_passant(dx)
-        elif self.piece.previous_position and dy == 1 and dx == 0 and self.tile is None:
+        elif dy == 1 and dx == 0 and self.tile is None:
             output = {"move": True}
         elif 1 <= dy <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
             output = {"move": True}
@@ -61,7 +61,7 @@ class ValidateMove(object):
     def castle(self, change):
         dx, dy = change
         output = {}
-        if dx != 0 and dy == 0 or dx == 0 and dy != 0 and self.validate_path():
+        if (dx != 0 and dy == 0 or dx == 0 and dy != 0) and self.validate_path():
             if self.tile is None:
                 output = {"move": True}
             else:
@@ -91,6 +91,9 @@ class ValidateMove(object):
     def queen(self, change):
         return self.bishop(change) or self.castle(change)
 
+    def castling(self, dx):
+        return False
+
     def king(self, change):
         output = {}
         dx, dy = list(map(abs, change))
@@ -99,6 +102,8 @@ class ValidateMove(object):
                 output = {"move": True}
             else:
                 output = {"capture": True}
+        elif self.castling(dx):
+            output = {"castling": self.castling(change[0])}
         return output
 
     def valid_piece_move(self):
