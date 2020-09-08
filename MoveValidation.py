@@ -39,7 +39,8 @@ class ValidateMove(object):
             side_tile = side_tile if side_tile is not None and side_tile.previous_position is not None else None
             if self.tile is None and side_tile is not None and side_tile.colour != self.piece.colour and side_tile.name == "pawn" and abs(
                     side_tile.original_position[1] - side_tile.previous_position[1]) == 2 and abs(dx) == 1:
-                output = {"en_passant": side_tile}
+                output = {"move": self.move,
+                          "en_passant": side_tile.original_position}
         return output
 
     def pawn(self, change):
@@ -91,8 +92,12 @@ class ValidateMove(object):
     def queen(self, change):
         return self.bishop(change) or self.castle(change)
 
-    def castling(self, dx):
-        return False
+    def castling(self, dx, dy):
+        if dx == 2 and dy == 0 and not self.piece.previous_position:
+            x, y = self.piece.original_position
+            tile = self.chess_board.get_tile((x + 3, y))
+            if tile is not None and tile.name == "castle":
+                return self.chess_board.get_tile((x + 3, y))
 
     def king(self, change):
         output = {}
@@ -102,8 +107,9 @@ class ValidateMove(object):
                 output = {"move": self.move}
             else:
                 output = {"capture": self.move}
-        elif self.castling(dx):
-            output = {"castling": self.castling(change[0])}
+        elif self.castling(dx, dy):
+            output = {"move": self.move,
+                      "castling": self.castling(dx, dy)}
         return output
 
     def valid_piece_move(self):
