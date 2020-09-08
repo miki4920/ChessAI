@@ -49,13 +49,13 @@ class ValidateMove(object):
         output = {}
         if abs(dx) == 1 and dy == 1:
             if self.tile is not None and self.tile.colour != self.piece.colour:
-                output = {"capture": True}
+                output = {"capture": self.move}
             elif self.en_passant(dx):
                 output = self.en_passant(dx)
         elif dy == 1 and dx == 0 and self.tile is None:
-            output = {"move": True}
+            output = {"move": self.move}
         elif 1 <= dy <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
-            output = {"move": True}
+            output = {"move": self.move}
         return output
 
     def castle(self, change):
@@ -63,9 +63,9 @@ class ValidateMove(object):
         output = {}
         if (dx != 0 and dy == 0 or dx == 0 and dy != 0) and self.validate_path():
             if self.tile is None:
-                output = {"move": True}
+                output = {"move": self.move}
             else:
-                output = {"capture": True}
+                output = {"capture": self.move}
         return output
 
     def knight(self, change):
@@ -73,9 +73,9 @@ class ValidateMove(object):
         output = {}
         if dx == 2 and dy == 1 or dx == 1 and dy == 2:
             if self.tile is None:
-                output = {"move": True}
+                output = {"move": self.move}
             else:
-                output = {"capture": True}
+                output = {"capture": self.move}
         return output
 
     def bishop(self, change):
@@ -83,9 +83,9 @@ class ValidateMove(object):
         output = {}
         if dx == dy and dx != 0 and self.validate_path():
             if self.tile is None:
-                output = {"move": True}
+                output = {"move": self.move}
             else:
-                output = {"capture": True}
+                output = {"capture": self.move}
         return output
 
     def queen(self, change):
@@ -99,9 +99,9 @@ class ValidateMove(object):
         dx, dy = list(map(abs, change))
         if dx < 2 and dy < 2 and (dx != 0 or dy != 0):
             if self.tile is None:
-                output = {"move": True}
+                output = {"move": self.move}
             else:
-                output = {"capture": True}
+                output = {"capture": self.move}
         elif self.castling(dx):
             output = {"castling": self.castling(change[0])}
         return output
@@ -133,16 +133,17 @@ class ValidateMove(object):
         return output
 
     def validate_moves(self, piece, chess_board, check=False):
-        moves = [move for move in chess_board.get_all_moves() if self.validate_move(piece, chess_board, move, check)]
+        moves = [self.validate_move(piece, chess_board, move, check) for move in chess_board.get_all_moves() if
+                 self.validate_move(piece, chess_board, move, check)]
         return moves
 
     def check(self, chess_board):
         pieces = chess_board.get_all_pieces_colour(not self.colour)
-        check = False
         for piece in pieces:
             for move in self.validate_moves(piece, chess_board):
-                move = self.chess_board.get_tile(move)
-                if move is not None and move.name == "king":
-                    check = True
-                    break
-        return check
+                capture = move.get("capture")
+                if capture:
+                    tile = self.chess_board.get_tile(capture)
+                    if tile is not None and tile.name == "king":
+                        return move
+        return {}

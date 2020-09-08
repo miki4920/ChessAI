@@ -55,6 +55,7 @@ class Interface(pyglet.window.Window):
         if self.current_piece:
             # TODO Create a way to check for check
             valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board, True)
+            valid_moves = [list(move.values())[0] for move in valid_moves]
             [create_dot(self.converter.stp(coordinates), self.square_size).draw() for coordinates in valid_moves]
             self.current_piece.draw()
         self.chess_board.draw()
