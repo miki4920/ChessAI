@@ -84,17 +84,17 @@ class Interface(pyglet.window.Window):
             if en_passant:
                 self.chess_board.set_tile(en_passant, None)
             elif castling:
-                move = move[0] - 1, move[1]
-                self.chess_board.set_tile(move, castling)
+                castling, coordinates = castling
+                self.chess_board.set_tile(coordinates, castling)
                 self.chess_board.set_tile(castling.original_position, None)
-                castling.set_position(move)
+                castling.set_position(coordinates)
             elif capture:
                 pass
             elif move:
                 pass
             self.chess_board.set_tile(destination, self.current_piece)
             self.current_piece.set_position(destination)
-            # self.validator.colour = not self.validator.colour
+            self.validator.colour = not self.validator.colour
         else:
             self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
         self.current_piece = None
