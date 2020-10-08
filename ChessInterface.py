@@ -5,6 +5,7 @@ from pyglet.window import mouse
 from UtilityFunctions import SizeConverter
 from MoveValidation import ValidateMove
 from ChessObjects import create_dot
+import time
 
 COLOUR_WHITE = (255, 255, 255)
 COLOUR_BLACK = (118, 150, 86)
@@ -53,7 +54,6 @@ class Interface(pyglet.window.Window):
         window.clear()
         [square.draw() for square in self.chess_squares]
         if self.current_piece:
-            # TODO Create a way to check for check
             valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board, True)
             valid_moves = [list(move.values())[0] for move in valid_moves]
             [create_dot(self.converter.stp(coordinates), self.square_size).draw() for coordinates in valid_moves]

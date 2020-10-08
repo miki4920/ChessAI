@@ -9,6 +9,12 @@ class ValidateMove(object):
         self.move = None
         self.chess_board = None
         self.tile = None
+        self.function_dictionary = {"pawn": self.pawn,
+                                    "castle": self.castle,
+                                    "knight": self.knight,
+                                    "bishop": self.bishop,
+                                    "queen": self.queen,
+                                    "king": self.king}
 
     def validate_pick(self, piece):
         if piece:
@@ -100,7 +106,6 @@ class ValidateMove(object):
         if dx == 2 and dy == 0 and not self.piece.previous_position and self.validate_path():
             castle_coordinates = castle_dictionary[tuple(self.move)]
             tile = self.chess_board.get_tile(castle_coordinates[0])
-
             if tile and tile.name == "castle" and not tile.previous_position:
                 return tile, castle_coordinates[1]
         return {}
@@ -119,15 +124,9 @@ class ValidateMove(object):
         return output
 
     def valid_piece_move(self):
-        function_dictionary = {"pawn": self.pawn,
-                               "castle": self.castle,
-                               "knight": self.knight,
-                               "bishop": self.bishop,
-                               "queen": self.queen,
-                               "king": self.king}
-        change = self.return_change(self.move, self.piece.original_position)
         if self.tile is None or self.tile.colour != self.piece.colour:
-            return function_dictionary[self.piece.name](change)
+            change = self.return_change(self.move, self.piece.original_position)
+            return self.function_dictionary[self.piece.name](change)
         return {}
 
     def validate_move(self, piece, chess_board, move, check):
@@ -145,8 +144,11 @@ class ValidateMove(object):
         return output
 
     def validate_moves(self, piece, chess_board, check=False):
-        moves = [self.validate_move(piece, chess_board, move, check) for move in chess_board.all_moves if
-                 self.validate_move(piece, chess_board, move, check)]
+        moves = []
+        for move in chess_board.all_moves:
+            output = self.validate_move(piece, chess_board, move, check)
+            if output:
+                moves.append(output)
         return moves
 
     def check(self, chess_board):
@@ -156,7 +158,7 @@ class ValidateMove(object):
                 capture = move.get("capture")
                 if capture:
                     tile = self.chess_board.get_tile(capture)
-                    if tile and tile.name == "king":
+                    if tile.name == "king":
                         return move
         return {}
 
@@ -166,4 +168,5 @@ class ValidateMove(object):
         for piece in pieces:
             if len(self.validate_moves(piece, chess_board, check=True)) > 0:
                 check_mate = False
+                break
         return check_mate
