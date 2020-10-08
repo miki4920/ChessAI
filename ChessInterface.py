@@ -95,6 +95,8 @@ class Interface(pyglet.window.Window):
             self.chess_board.set_tile(destination, self.current_piece)
             self.current_piece.set_position(destination)
             self.validator.colour = not self.validator.colour
+            if self.validator.check_mate(self.chess_board):
+                print("Winner")
         else:
             self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
         self.current_piece = None

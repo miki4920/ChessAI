@@ -145,7 +145,7 @@ class ValidateMove(object):
         return output
 
     def validate_moves(self, piece, chess_board, check=False):
-        moves = [self.validate_move(piece, chess_board, move, check) for move in chess_board.get_all_moves() if
+        moves = [self.validate_move(piece, chess_board, move, check) for move in chess_board.all_moves if
                  self.validate_move(piece, chess_board, move, check)]
         return moves
 
@@ -159,3 +159,11 @@ class ValidateMove(object):
                     if tile and tile.name == "king":
                         return move
         return {}
+
+    def check_mate(self, chess_board):
+        pieces = chess_board.get_all_pieces_colour(self.colour)
+        check_mate = True
+        for piece in pieces:
+            if len(self.validate_moves(piece, chess_board, check=True)) > 0:
+                check_mate = False
+        return check_mate
