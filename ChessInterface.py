@@ -5,7 +5,7 @@ from pyglet.window import mouse
 from UtilityFunctions import SizeConverter
 from MoveValidation import ValidateMove
 from ChessObjects import create_dot
-import time
+from ChessAI import ChessAI
 
 COLOUR_WHITE = (255, 255, 255)
 COLOUR_BLACK = (118, 150, 86)
@@ -19,12 +19,15 @@ class Interface(pyglet.window.Window):
         self.square_size = int(self.resolution / 8)
         self.converter = SizeConverter(self.square_size)
         self.validator = ValidateMove()
+        self.ai = ChessAI()
         super(Interface, self).__init__(width=self.resolution, height=self.resolution)
         super(Interface, self).set_location(center[0], center[1])
         self.chess_squares = [None] * 64
         self.chess_board = ChessBoard(self.square_size)
         self.draw_chessboard()
         self.current_piece = None
+        self.computer = False
+        self.win = False
 
     @staticmethod
     def get_resolution():
@@ -61,12 +64,12 @@ class Interface(pyglet.window.Window):
         self.chess_board.draw()
 
     def on_mouse_press(self, x, y, buttons, modifiers):
-        move = self.converter.pts((x, y))
-        piece = self.chess_board.get_tile(move)
-        if piece and not self.current_piece and mouse.LEFT:
-            self.select_piece(piece, move)
+        destination = self.converter.pts((x, y))
+        piece = self.chess_board.get_tile(destination)
+        if piece and not self.current_piece and mouse.LEFT and not self.win:
+            self.select_piece(piece, destination)
         elif self.current_piece:
-            self.move_piece(move)
+            self.current_piece = self.move_piece(self.current_piece, destination)
 
     def select_piece(self, piece, move):
         if self.validator.validate_pick(piece):
@@ -74,8 +77,8 @@ class Interface(pyglet.window.Window):
             self.current_piece.original_position = move
             self.chess_board.set_tile(move, None)
 
-    def move_piece(self, destination):
-        task = self.validator.validate_move(self.current_piece, self.chess_board, destination, True)
+    def move_piece(self, piece, destination):
+        task = self.validator.validate_move(piece, self.chess_board, destination, True)
         move = task.get("move")
         capture = task.get("capture")
         en_passant = task.get("en_passant")
@@ -92,14 +95,21 @@ class Interface(pyglet.window.Window):
                 pass
             elif move:
                 pass
-            self.chess_board.set_tile(destination, self.current_piece)
+            self.chess_board.set_tile(destination, piece)
             self.current_piece.set_position(destination)
             self.validator.colour = not self.validator.colour
             if self.validator.check_mate(self.chess_board):
                 print("Winner")
+                self.win = True
+                self.validator.colour = self.validator.colour
+            if self.computer == self.validator.colour:
+                piece, destination = self.ai.get_a_move(self.chess_board, self.validator)
+                self.current_piece = piece
+                self.chess_board.set_tile(self.current_piece.original_position, None)
+                self.move_piece(self.current_piece, destination)
         else:
-            self.chess_board.set_tile(self.current_piece.original_position, self.current_piece)
-        self.current_piece = None
+            self.chess_board.set_tile(piece.original_position, piece)
+        return
 
 
 window = Interface()
