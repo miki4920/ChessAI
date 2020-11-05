@@ -6,11 +6,25 @@ from UtilityFunctions import SizeConverter
 from MoveValidation import ValidateMove
 from ChessObjects import create_dot
 from ChessAI import ChessAI
+import time
 
 COLOUR_WHITE = (255, 255, 255)
 COLOUR_BLACK = (118, 150, 86)
 RESOLUTION_OFFSET = 0.93
 BAR_OFFSET = 0.03
+
+
+def visualise(chess_board):
+    board = [0] * 8
+    for i in range(8):
+        board[i] = [" "] * 8
+    for row in chess_board.chess_board:
+        for piece in row:
+            if piece:
+                x, y = piece.original_position
+                board[y][x] = "X"
+    for i in range(0, 8):
+        print(" ".join(board[i]))
 
 
 class Interface(pyglet.window.Window):
@@ -26,7 +40,6 @@ class Interface(pyglet.window.Window):
         self.chess_board = ChessBoard(self.square_size)
         self.draw_chessboard()
         self.current_piece = None
-        self.computer = False
         self.win = False
 
     @staticmethod
@@ -69,12 +82,13 @@ class Interface(pyglet.window.Window):
         if piece and not self.current_piece and mouse.LEFT and not self.win:
             self.select_piece(piece, destination)
         elif self.current_piece:
-            self.current_piece = self.move_piece(self.current_piece, destination)
+            self.move_piece(self.current_piece, destination)
+            self.current_piece = None
 
     def select_piece(self, piece, move):
-        if self.validator.validate_pick(piece):
+        visualise(self.chess_board)
+        if self.validator.colour == piece.colour:
             self.current_piece = piece
-            self.current_piece.original_position = move
             self.chess_board.set_tile(move, None)
 
     def move_piece(self, piece, destination):
@@ -99,17 +113,16 @@ class Interface(pyglet.window.Window):
             self.current_piece.set_position(destination)
             self.validator.colour = not self.validator.colour
             if self.validator.check_mate(self.chess_board):
-                print("Winner")
+                print("Winner", not self.validator.colour)
                 self.win = True
-                self.validator.colour = self.validator.colour
-            if self.computer == self.validator.colour:
+                visualise(self.chess_board)
+            else:
                 piece, destination = self.ai.get_a_move(self.chess_board, self.validator)
                 self.current_piece = piece
                 self.chess_board.set_tile(self.current_piece.original_position, None)
                 self.move_piece(self.current_piece, destination)
         else:
             self.chess_board.set_tile(piece.original_position, piece)
-        return
 
 
 window = Interface()

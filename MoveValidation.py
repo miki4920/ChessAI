@@ -1,4 +1,4 @@
-from bresenham import bresenham
+from UtilityFunctions import bresenham, delta_distance
 
 
 class ValidateMove(object):
@@ -16,24 +16,13 @@ class ValidateMove(object):
                                     "queen": self.queen,
                                     "king": self.king}
 
-    def validate_pick(self, piece):
-        if piece:
-            return self.colour == piece.colour
-
-    @staticmethod
-    def return_change(move, piece):
-        dx = move[0] - piece[0]
-        dy = move[1] - piece[1]
-        return dx, dy
-
-    def return_bresenham(self):
-        return list(
-            bresenham(self.piece.original_position[0], self.piece.original_position[1], self.move[0], self.move[1]))[
-               1:-1]
-
     def validate_path(self):
         if self.tile is None or self.tile.colour != self.piece.colour:
-            if all([self.chess_board.get_tile(coordinate) is None for coordinate in self.return_bresenham()]):
+            bresenham_list = list(
+                bresenham(self.piece.original_position[0], self.piece.original_position[1], self.move[0],
+                          self.move[1]))[
+                             1:-1]
+            if all([self.chess_board.get_tile(coordinate) is None for coordinate in bresenham_list]):
                 return True
         return False
 
@@ -51,18 +40,17 @@ class ValidateMove(object):
 
     def pawn(self, change):
         dx, dy = change
-        colour = 1 if self.piece.colour else -1
-        dy = dy * colour
+        dy = dy * (1 if self.piece.colour else -1)
         output = {}
-        if abs(dx) == 1 and dy == 1:
+        if dy == 1 and dx == 0 and self.tile is None:
+            output = {"move": self.move}
+        elif 1 <= dy <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
+            output = {"move": self.move}
+        elif abs(dx) == 1 and dy == 1:
             if self.tile and self.tile.colour != self.piece.colour:
                 output = {"capture": self.move}
             elif self.en_passant(dx):
                 output = self.en_passant(dx)
-        elif dy == 1 and dx == 0 and self.tile is None:
-            output = {"move": self.move}
-        elif 1 <= dy <= 2 and dx == 0 and self.validate_path() and not self.piece.previous_position:
-            output = {"move": self.move}
         return output
 
     def castle(self, change):
@@ -88,7 +76,7 @@ class ValidateMove(object):
     def bishop(self, change):
         dx, dy = list(map(abs, change))
         output = {}
-        if dx == dy and dx != 0 and self.validate_path():
+        if dx != 0 and dx == dy and self.validate_path():
             if self.tile is None:
                 output = {"move": self.move}
             else:
@@ -125,7 +113,7 @@ class ValidateMove(object):
 
     def valid_piece_move(self):
         if self.tile is None or self.tile.colour != self.piece.colour:
-            change = self.return_change(self.move, self.piece.original_position)
+            change = delta_distance(self.move, self.piece.original_position)
             return self.function_dictionary[self.piece.name](change)
         return {}
 
