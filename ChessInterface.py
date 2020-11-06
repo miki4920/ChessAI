@@ -6,26 +6,11 @@ from UtilityFunctions import SizeConverter
 from MoveValidation import ValidateMove
 from ChessObjects import create_dot
 from ChessAI import ChessAI
-import time
 
 COLOUR_WHITE = (255, 255, 255)
 COLOUR_BLACK = (118, 150, 86)
 RESOLUTION_OFFSET = 0.93
 BAR_OFFSET = 0.03
-
-
-def visualise(chess_board):
-    board = [0] * 8
-    for i in range(8):
-        board[i] = [" "] * 8
-    for row in chess_board.chess_board:
-        for piece in row:
-            if piece:
-                x, y = piece.original_position
-                board[y][x] = "X"
-    for i in range(0, 8):
-        print(" ".join(board[i]))
-
 
 class Interface(pyglet.window.Window):
     def __init__(self):
@@ -70,7 +55,7 @@ class Interface(pyglet.window.Window):
         window.clear()
         [square.draw() for square in self.chess_squares]
         if self.current_piece:
-            valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board, True)
+            valid_moves = self.validator.validate_moves(self.current_piece, self.chess_board)
             valid_moves = [list(move.values())[0] for move in valid_moves]
             [create_dot(self.converter.stp(coordinates), self.square_size).draw() for coordinates in valid_moves]
             self.current_piece.draw()
@@ -86,41 +71,16 @@ class Interface(pyglet.window.Window):
             self.current_piece = None
 
     def select_piece(self, piece, move):
-        visualise(self.chess_board)
         if self.validator.colour == piece.colour:
             self.current_piece = piece
             self.chess_board.set_tile(move, None)
 
     def move_piece(self, piece, destination):
         task = self.validator.validate_move(piece, self.chess_board, destination, True)
-        move = task.get("move")
-        capture = task.get("capture")
-        en_passant = task.get("en_passant")
-        castling = task.get("castling")
         if task:
-            if en_passant:
-                self.chess_board.set_tile(en_passant, None)
-            elif castling:
-                castling, coordinates = castling
-                self.chess_board.set_tile(coordinates, castling)
-                self.chess_board.set_tile(castling.original_position, None)
-                castling.set_position(coordinates)
-            elif capture:
-                pass
-            elif move:
-                pass
-            self.chess_board.set_tile(destination, piece)
+            self.chess_board.accept_move(task, piece)
             self.current_piece.set_position(destination)
             self.validator.colour = not self.validator.colour
-            if self.validator.check_mate(self.chess_board):
-                print("Winner", not self.validator.colour)
-                self.win = True
-                visualise(self.chess_board)
-            else:
-                piece, destination = self.ai.get_a_move(self.chess_board, self.validator)
-                self.current_piece = piece
-                self.chess_board.set_tile(self.current_piece.original_position, None)
-                self.move_piece(self.current_piece, destination)
         else:
             self.chess_board.set_tile(piece.original_position, piece)
 

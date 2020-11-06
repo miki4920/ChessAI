@@ -111,25 +111,22 @@ class ValidateMove(object):
                       "castling": self.castling(dx, dy)}
         return output
 
-    def valid_piece_move(self):
-        if self.tile is None or self.tile.colour != self.piece.colour:
-            change = delta_distance(self.move, self.piece.original_position)
-            return self.function_dictionary[self.piece.name](change)
-        return {}
-
     def validate_move(self, piece, chess_board, move, check):
         self.piece = piece
         self.move = move
         self.chess_board = chess_board
         self.tile = self.chess_board.get_tile(self.move)
-        output = self.valid_piece_move()
-        if check and output:
-            tile = self.chess_board.get_tile(move)
-            self.chess_board.set_tile(move, self.piece)
-            if self.check(self.chess_board):
-                output = {}
-            self.chess_board.set_tile(move, tile)
-        return output
+        if self.tile is None or self.tile.colour != self.piece.colour:
+            change = delta_distance(self.move, self.piece.original_position)
+            output = self.function_dictionary[self.piece.name](change)
+            if check and output:
+                tile = self.chess_board.get_tile(move)
+                self.chess_board.set_tile(move, self.piece)
+                if self.check_for_check(self.chess_board):
+                    return {}
+                self.chess_board.set_tile(move, tile)
+                return output
+        return {}
 
     def validate_moves(self, piece, chess_board, check=False):
         moves = []
@@ -139,7 +136,7 @@ class ValidateMove(object):
                 moves.append(output)
         return moves
 
-    def check(self, chess_board):
+    def check_for_check(self, chess_board):
         pieces = chess_board.get_all_pieces_colour(not self.colour)
         for piece in pieces:
             for move in self.validate_moves(piece, chess_board):
@@ -149,12 +146,3 @@ class ValidateMove(object):
                     if tile.name == "king":
                         return move
         return {}
-
-    def check_mate(self, chess_board):
-        pieces = chess_board.get_all_pieces_colour(self.colour)
-        check_mate = True
-        for piece in pieces:
-            if len(self.validate_moves(piece, chess_board, check=True)) > 0:
-                check_mate = False
-                break
-        return check_mate

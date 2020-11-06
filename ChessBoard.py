@@ -55,3 +55,20 @@ class ChessBoard(object):
 
     def draw(self):
         [piece.draw() for piece in sum(self.chess_board, []) if piece]
+
+    def accept_move(self, task, piece):
+        move = task.get("move")
+        capture = task.get("capture")
+        en_passant = task.get("en_passant")
+        castling = task.get("castling")
+        if en_passant:
+            self.set_tile(en_passant, None)
+        elif castling:
+            castling, coordinates = castling
+            self.set_tile(coordinates, castling)
+            self.set_tile(castling.original_position, None)
+            castling.set_position(coordinates)
+        if capture:
+            self.set_tile(capture, piece)
+        if move:
+            self.set_tile(move, piece)
