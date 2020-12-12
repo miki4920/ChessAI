@@ -12,6 +12,7 @@ COLOUR_BLACK = (118, 150, 86)
 RESOLUTION_OFFSET = 0.93
 BAR_OFFSET = 0.03
 
+
 class Interface(pyglet.window.Window):
     def __init__(self):
         self.resolution, center = self.get_resolution()
