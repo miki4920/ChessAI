@@ -77,7 +77,7 @@ class Interface(pyglet.window.Window):
             self.chess_board.set_tile(move, None)
 
     def move_piece(self, piece, destination):
-        task = self.validator.validate_move(piece, self.chess_board, destination, True)
+        task = self.validator.validate_move(piece, self.chess_board, destination, False)
         if task:
             self.chess_board.accept_move(task, piece)
             self.current_piece.set_position(destination)

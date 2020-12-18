@@ -119,13 +119,7 @@ class ValidateMove(object):
         if self.tile is None or self.tile.colour != self.piece.colour:
             change = delta_distance(self.move, self.piece.original_position)
             output = self.function_dictionary[self.piece.name](change)
-            if check and output:
-                tile = self.chess_board.get_tile(move)
-                self.chess_board.set_tile(move, self.piece)
-                if self.check_for_check(self.chess_board):
-                    return {}
-                self.chess_board.set_tile(move, tile)
-                return output
+            return output
         return {}
 
     def validate_moves(self, piece, chess_board, check=False):
@@ -135,14 +129,3 @@ class ValidateMove(object):
             if output:
                 moves.append(output)
         return moves
-
-    def check_for_check(self, chess_board):
-        pieces = chess_board.get_all_pieces_colour(not self.colour)
-        for piece in pieces:
-            for move in self.validate_moves(piece, chess_board):
-                capture = move.get("capture")
-                if capture:
-                    tile = self.chess_board.get_tile(capture)
-                    if tile.name == "king":
-                        return move
-        return {}
